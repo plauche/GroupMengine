@@ -30,6 +30,7 @@ var handlers = map[string]HandleFunc{
 	"/music":        spotifySearch,
 	"/groupmengine": generic,
 	"/chatter":      redditSearch,
+	"/watchout":     imgurSearch,
 }
 
 func generic(client *http.Client, term string, w http.ResponseWriter) string {
