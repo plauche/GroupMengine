@@ -4,9 +4,6 @@ import (
 	"appengine"
 	"appengine/urlfetch"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -29,20 +26,10 @@ type NewMessage struct {
 
 type HandleFunc func(client *http.Client, term string, w http.ResponseWriter) string
 
-func randomWiki(client *http.Client, term string, w http.ResponseWriter) string {
-	res, err := client.Get("http://en.wikipedia.org/wiki/Special:Random")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	resp, err := ioutil.ReadAll(res.Body)
-	res.Body.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Fprintln(w, string(resp))
-	return string(resp)
+var handlers = map[string]HandleFunc{
+	"/music":        spotifySearch,
+	"/groupmengine": generic,
+	"/babble":       redditSearch,
 }
 
 func generic(client *http.Client, term string, w http.ResponseWriter) string {
@@ -52,12 +39,6 @@ func generic(client *http.Client, term string, w http.ResponseWriter) string {
 func sendMessage(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	client := urlfetch.Client(c)
-
-	var handlers = map[string]HandleFunc{
-		"/music":        spotifySearch,
-		"/groupmengine": generic,
-		"/saywhat":      redditSearch,
-	}
 
 	p := make([]byte, r.ContentLength)
 	_, err := r.Body.Read(p)
