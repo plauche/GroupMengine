@@ -29,7 +29,7 @@ type HandleFunc func(client *http.Client, term string, w http.ResponseWriter) st
 var handlers = map[string]HandleFunc{
 	"/music":        spotifySearch,
 	"/groupmengine": generic,
-	"/babble":       redditSearch,
+	"/chatter":      redditSearch,
 }
 
 func generic(client *http.Client, term string, w http.ResponseWriter) string {
