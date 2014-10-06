@@ -34,10 +34,39 @@ func selectImage(images []ImgurImage) string {
 			}
 		}
 	}
-	return ""
+	return "Error No Image Found"
 }
 
 func imgurSearch(client *http.Client, term string, w http.ResponseWriter) string {
+	// curl -H "Authorization: Client-ID CLIENT_ID_HERE" https://api.imgur.com/3/gallery/hot/viral/0.json
+	searchUrl := fmt.Sprintf("https://api.imgur.com/3/gallery/search?q=%s&q_any", term)
+	req, err := http.NewRequest("GET", searchUrl, nil)
+	if err != nil {
+		fmt.Fprint(w, "get setup failed")
+		return "Error No Image Found"
+	}
+	req.Header.Add("Authorization", imgurkey)
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Fprint(w, "get failed")
+		return "Error No Image Found"
+	}
+
+	resp, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		fmt.Fprint(w, "bad resp body")
+		return "Error No Image Found"
+	}
+
+	var imgResponse ImgurResponse
+	err = json.Unmarshal(resp, &imgResponse)
+
+	return selectImage(imgResponse.Data)
+}
+
+func imgurRandom(client *http.Client, term string, w http.ResponseWriter) string {
 	// curl -H "Authorization: Client-ID CLIENT_ID_HERE" https://api.imgur.com/3/gallery/hot/viral/0.json
 	searchUrl := fmt.Sprintf("https://api.imgur.com/3/gallery/hot/viral/0.json")
 	req, err := http.NewRequest("GET", searchUrl, nil)

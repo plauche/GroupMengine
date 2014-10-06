@@ -28,14 +28,12 @@ type HandleFunc func(client *http.Client, term string, w http.ResponseWriter) st
 
 var handlers = map[string]HandleFunc{
 	"/music":        spotifySearch,
-	"/groupmengine": generic,
+	"/groupmengine": randoText,
 	"/chatter":      redditSearch,
-	"/watchout":     imgurSearch,
+	"/watchout":     imgurRandom,
+	"/imgur":        imgurSearch,
 }
 
-func generic(client *http.Client, term string, w http.ResponseWriter) string {
-	return "I LOVE YOU"
-}
 
 func sendMessage(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
