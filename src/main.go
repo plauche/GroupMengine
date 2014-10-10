@@ -10,7 +10,17 @@ import (
 	"strings"
 )
 
+type HandleFunc func(client *http.Client, term string, w http.ResponseWriter) string
+
+type GroupMengineConfig struct {
+	Handlers map[string]HandleFunc
+	Bots     map[string]string
+}
+
+var Config GroupMengineConfig
+
 func init() {
+	Config = GetConfig()
 	http.HandleFunc("/newmsg", sendMessage)
 }
 
@@ -19,22 +29,11 @@ type NewMessage struct {
 	Source_guid string `json:"source_guid"`
 	Created_at  int    `json:"created_at"`
 	User_id     string `json:"user_id"`
-	Groupd_id   string `json:"group_id"`
+	Group_id    string `json:"group_id"`
 	Name        string `json:"name"`
 	Avatar_url  string `json:"avatar_url"`
 	Text        string `json:"text"`
 }
-
-type HandleFunc func(client *http.Client, term string, w http.ResponseWriter) string
-
-var handlers = map[string]HandleFunc{
-	"/music":        spotifySearch,
-	"/groupmengine": randoText,
-	"/chatter":      redditSearch,
-	"/watchout":     imgurRandom,
-	"/imgur":        imgurSearch,
-}
-
 
 func sendMessage(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
@@ -56,10 +55,10 @@ func sendMessage(w http.ResponseWriter, r *http.Request) {
 				cmdType := strings.Split(cmd, " ")[0]
 				cmdBody := strings.TrimSpace(strings.Replace(cmd, cmdType, "", -1))
 				cmdBody = strings.Replace(cmdBody, " ", "+", -1)
-				handler, ok := handlers[cmdType]
+				handler, ok := Config.Handlers[cmdType]
 				if ok {
 					form := make(url.Values)
-					form.Add("bot_id", bots[msg.Groupd_id])
+					form.Add("bot_id", Config.Bots[msg.Group_id])
 					form.Add("text", handler(client, cmdBody, w))
 					client.PostForm("https://api.groupme.com/v3/bots/post", form)
 				}
