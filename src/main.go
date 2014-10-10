@@ -2,6 +2,7 @@ package GroupMengine
 
 import (
 	"appengine"
+	"appengine/datastore"
 	"appengine/urlfetch"
 	"encoding/json"
 	"net/http"
@@ -45,6 +46,11 @@ func sendMessage(w http.ResponseWriter, r *http.Request) {
 		var msg NewMessage
 		err1 := json.Unmarshal(p, &msg)
 		if err1 == nil {
+			// Save off message :)
+			_, err := datastore.Put(c, datastore.NewIncompleteKey(c, "Messages", nil), &msg)
+			if err != nil {
+				return
+			}
 			cmd := msg.Text
 			if strings.Index(cmd, "/") == 0 {
 				cmdType := strings.Split(cmd, " ")[0]

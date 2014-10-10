@@ -10,9 +10,9 @@ import (
 )
 
 type ImgurImage struct {
-	Link    string
-	Nsfw    bool
-	IsAlbum bool
+	Link     string
+	Nsfw     bool
+	Is_album bool
 }
 
 type ImgurData struct {
@@ -28,9 +28,9 @@ func selectImage(images []ImgurImage) string {
 	numImgs := len(images)
 	if numImgs > 0 {
 		for i := 0; i < 20; i++ {
-			randPos := rand.Intn(numImgs)
-			if !images[randPos].IsAlbum && !images[randPos].Nsfw {
-				return images[randPos].Link
+			randimg := images[rand.Intn(numImgs)]
+			if randimg.Is_album != true && randimg.Nsfw != true {
+				return randimg.Link
 			}
 		}
 	}
